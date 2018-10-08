@@ -41,7 +41,7 @@ describe 'User stories' do
     card = Oystercard.new
     card.top_up(10)
     card.touch_in("Station")
-    card.touch_out
+    card.touch_out("Station2")
     expect { card.in_journey? }.not_to raise_error
   end
 
@@ -60,7 +60,7 @@ describe 'User stories' do
     card = Oystercard.new
     card.top_up(10)
     card.touch_in("Station")
-    card.touch_out
+    card.touch_out("Station2")
     expect(card.balance).to eq(10 - Oystercard::MINIMUM)
   end
 
@@ -72,6 +72,17 @@ describe 'User stories' do
     card.top_up(10)
     card.touch_in("Station")
     expect(card.entry_station).to eq("Station")
+  end
+
+  it 'remembers all previous journeys' do
+    # In order to know where I have been
+    # As a customer
+    # I want to see all my previous trips
+    card = Oystercard.new
+    card.top_up(10)
+    card.touch_in("Station1a")
+    card.touch_out("Station1b")
+    expect(card.journey_history).to eq({entry_station: "Station1a", exit_station: "Station1b"})
   end
 
 end

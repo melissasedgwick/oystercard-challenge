@@ -3,6 +3,7 @@ require 'oystercard'
 describe Oystercard do
 
   let(:station) { double(:station) }
+  let(:station2) { double(:station2) }
 
   describe '#balance' do
 
@@ -53,23 +54,36 @@ describe Oystercard do
       expect { subject.touch_in(station) }.to raise_error("Error: less than minimum fare of £#{Oystercard::MINIMUM}")
     end
 
+    it 'shows entry station' do
+      subject.top_up(10)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq(station)
+    end
+
   end
 
   describe '#touch_out' do
 
-    it { is_expected.to respond_to(:touch_out) }
+    it { is_expected.to respond_to(:touch_out).with(1).argument }
 
     it 'shows in journey as false' do
       subject.top_up(10)
       subject.touch_in(station)
-      subject.touch_out
+      subject.touch_out(station2)
       expect(subject.in_journey?).to eq(false)
     end
 
     it 'deducts fare from balance' do
       subject.top_up(10)
       subject.touch_in(station)
-      expect{ subject.touch_out }.to change{ subject.balance }.by -(Oystercard::MINIMUM)
+      expect{ subject.touch_out(station2) }.to change{ subject.balance }.by -(Oystercard::MINIMUM)
+    end
+
+    it 'shows the exit station' do
+      subject.top_up(10)
+      subject.touch_in(station)
+      subject.touch_out(station2)
+      expect(subject.exit_station).to eq(station2)
     end
 
   end
@@ -92,6 +106,28 @@ describe Oystercard do
       subject.top_up(10)
       subject.touch_in(station)
       expect(subject.entry_station).to eq(station)
+    end
+
+  end
+
+  describe '#journey_history' do
+
+    it 'should show no history by default' do
+      expect(subject.journey_history).to be_empty
+    end
+
+    it 'stores journey history' do
+      subject.top_up(10)
+      subject.touch_in(station)
+      subject.touch_out(station2)
+      expect(subject.journey_history).to eq({entry_station: station, exit_station: station2})
+    end
+
+    it 'adds journey to all journeys' do
+      subject.top_up(10)
+      subject.touch_in(station)
+      subject.touch_out(station2)
+      expect(subject.all_journeys).to include subject.journey_history
     end
 
   end
