@@ -2,6 +2,8 @@ require 'oystercard'
 
 describe Oystercard do
 
+  let(:station) { double(:station) }
+
   describe '#balance' do
 
     it "has a balance of 0 when created" do
@@ -39,16 +41,16 @@ describe Oystercard do
 
   describe '#touch_in' do
 
-    it { is_expected.to respond_to(:touch_in) }
+    it { is_expected.to respond_to(:touch_in).with(1).argument }
 
     it 'shows in journey as true' do
       subject.top_up(10)
-      subject.touch_in
-      expect(subject.in_journey).to eq(true)
+      subject.touch_in(station)
+      expect(subject.in_journey?).to eq(true)
     end
 
     it 'raises error when trying to touch in with less than minimum funds' do
-      expect { subject.touch_in }.to raise_error("Error: less than minimum fare of £#{Oystercard::MINIMUM}")
+      expect { subject.touch_in(station) }.to raise_error("Error: less than minimum fare of £#{Oystercard::MINIMUM}")
     end
 
   end
@@ -59,14 +61,14 @@ describe Oystercard do
 
     it 'shows in journey as false' do
       subject.top_up(10)
-      subject.touch_in
+      subject.touch_in(station)
       subject.touch_out
-      expect(subject.in_journey).to eq(false)
+      expect(subject.in_journey?).to eq(false)
     end
 
     it 'deducts fare from balance' do
       subject.top_up(10)
-      subject.touch_in
+      subject.touch_in(station)
       expect{ subject.touch_out }.to change{ subject.balance }.by -(Oystercard::MINIMUM)
     end
 
@@ -74,10 +76,22 @@ describe Oystercard do
 
   describe '#in_journey' do
 
-    it { is_expected.to respond_to(:in_journey) }
+    it { is_expected.to respond_to(:in_journey?) }
 
     it 'returns a boolean' do
-      expect(subject.in_journey).to eq(false).or(eq(true))
+      expect(subject.in_journey?).to eq(false).or(eq(true))
+    end
+
+  end
+
+  describe '#entry_station' do
+
+    it { is_expected.to respond_to(:entry_station) }
+
+    it 'stores the entry station' do
+      subject.top_up(10)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq(station)
     end
 
   end
