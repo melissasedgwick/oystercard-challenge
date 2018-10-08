@@ -26,24 +26,29 @@ describe Oystercard do
 
   end
 
-  describe '#deduct' do
-
-    it { is_expected.to respond_to(:deduct).with(1).argument }
-
-    it 'deducts an amount from the balance' do
-      subject.top_up(20)
-      expect{ subject.deduct 3}.to change{ subject.balance }.by -3
-    end
-
-  end
+  # describe '#deduct' do
+  #
+  #   it { is_expected.to respond_to(:deduct).with(1).argument }
+  #
+  #   it 'deducts an amount from the balance' do
+  #     subject.top_up(20)
+  #     expect{ subject.deduct 3}.to change{ subject.balance }.by -3
+  #   end
+  #
+  # end
 
   describe '#touch_in' do
 
     it { is_expected.to respond_to(:touch_in) }
 
     it 'shows in journey as true' do
+      subject.top_up(10)
       subject.touch_in
       expect(subject.in_journey).to eq(true)
+    end
+
+    it 'raises error when trying to touch in with less than minimum funds' do
+      expect { subject.touch_in }.to raise_error("Error: less than minimum fare of £#{Oystercard::MINIMUM}")
     end
 
   end
@@ -53,9 +58,16 @@ describe Oystercard do
     it { is_expected.to respond_to(:touch_out) }
 
     it 'shows in journey as false' do
+      subject.top_up(10)
       subject.touch_in
       subject.touch_out
       expect(subject.in_journey).to eq(false)
+    end
+
+    it 'deducts fare from balance' do
+      subject.top_up(10)
+      subject.touch_in
+      expect{ subject.touch_out }.to change{ subject.balance }.by -(Oystercard::MINIMUM)
     end
 
   end
