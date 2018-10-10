@@ -110,24 +110,24 @@ describe Oystercard do
 
   end
 
-  describe '#journey_history' do
+  describe '#previous_journey' do
 
     it 'should show no history by default' do
-      expect(subject.journey_history).to be_empty
+      expect(subject.previous_journey).to be_empty
     end
 
     it 'stores journey history' do
       subject.top_up(10)
       subject.touch_in(station)
       subject.touch_out(station2)
-      expect(subject.journey_history).to eq({entry_station: station, exit_station: station2})
+      expect(subject.previous_journey).to eq({entry_station: station, exit_station: station2})
     end
 
     it 'adds journey to all journeys' do
       subject.top_up(10)
       subject.touch_in(station)
       subject.touch_out(station2)
-      expect(subject.all_journeys).to include subject.journey_history
+      expect(subject.all_journeys).to include subject.previous_journey
     end
 
   end
